@@ -3,7 +3,7 @@
 #include <math.h>
 #include <time.h>
 #include "evtstatmac.h"
-#include "tga.h"
+#include "tgapaint.h"
 
 #define rnd() (double)(rand())/(float)(RAND_MAX)
  
@@ -148,14 +148,16 @@ int main(int argc, char **argv) {
   pix._rgba[0] = pix._rgba[1] = pix._rgba[2] = 255;
   pix._rgba[3] = 255;
   graph = TGACreate(dim, &pix);
+  TGAPencil *pen = TGAGetBlackPencil();
   if (graph == NULL) {
     fprintf(stderr, "Error while creating the graph\n");
     ESMFree(&epidemicESM);
     return 1;
   }
-  short fromPx[2];
-  short toPx[2];
+  float fromPx[2];
+  float toPx[2];
   pix._rgba[0] = pix._rgba[1] = 155;
+  TGAPencilSetColor(pen, &pix);
   for (int iSample = 0; iSample < nbSampleEpidemic - 1; ++iSample) {
     esmStat from = dataEpidemic[3 * iSample];
     esmEvt event = dataEpidemic[3 * iSample + 1];
@@ -165,11 +167,12 @@ int main(int argc, char **argv) {
       fromPx[1] = from * coeff[1];
       toPx[0] = event * coeff[0];
       toPx[1] = to * coeff[1];
-      TGADrawLine(graph, fromPx, toPx, &pix);
+      TGADrawLine(graph, fromPx, toPx, pen);
     }
   }
   epidemicESM->_curState = stat_7;
   pix._rgba[0] = pix._rgba[1] = pix._rgba[2] = 0;
+  TGAPencilSetColor(pen, &pix);
   for (int iWeek = 1; iWeek < 52; ++iWeek) {
     esmStat curStat = ESMGetStat(epidemicESM);
     if (curStat == ESM_STATNULL) {
@@ -182,7 +185,7 @@ int main(int argc, char **argv) {
       fromPx[1] = curStat * coeff[1];
       toPx[0] = iWeek * coeff[0];
       toPx[1] = nextStat * coeff[1];
-      TGADrawLine(graph, fromPx, toPx, &pix);
+      TGADrawLine(graph, fromPx, toPx, pen);
       printf("%d/%s, ", iWeek, strStatEpidemic[curStat]);
     }
   }

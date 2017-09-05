@@ -16,7 +16,7 @@ disease : disease.o evtstatmac.o Makefile
 	gcc $(OPTIONS) evtstatmac.o disease.o -o disease -lm
 
 epidemic : epidemic.o evtstatmac.o Makefile
-	gcc $(OPTIONS) $(LIBPATH)/tga.o evtstatmac.o epidemic.o -o epidemic -lm
+	gcc $(OPTIONS) $(LIBPATH)/tgapaint.o evtstatmac.o epidemic.o -o epidemic -lm
 
 cashier : cashier.o evtstatmac.o Makefile
 	gcc $(OPTIONS) $(LIBPATH)/gset.o evtstatmac.o cashier.o -o cashier -lm
@@ -30,7 +30,7 @@ haircut.o : evtstatmac.h haircut.c Makefile
 disease.o : evtstatmac.h disease.c Makefile
 	gcc $(OPTIONS) -c disease.c
 
-epidemic.o : evtstatmac.h epidemic.c Makefile $(INCPATH)/tga.h
+epidemic.o : evtstatmac.h epidemic.c Makefile $(INCPATH)/tgapaint.h
 	gcc $(OPTIONS) -I$(INCPATH) -c epidemic.c
 
 cashier.o : evtstatmac.h cashier.c Makefile $(INCPATH)/gset.h

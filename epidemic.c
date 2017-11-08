@@ -141,9 +141,9 @@ int main(int argc, char **argv) {
   printf("Artificial data series (week/category):\n");
   TGA *graph = NULL;
   short coeff[2] = {4, 10};
-  short dim[2];
-  dim[0] = coeff[0] * nbEvent;
-  dim[1] = coeff[1] * nbState;
+  VecShort *dim = VecShortCreate(2);
+  VecSet(dim, 0, coeff[0] * nbEvent);
+  VecSet(dim, 1, coeff[1] * nbState);
   TGAPixel pix;
   pix._rgba[0] = pix._rgba[1] = pix._rgba[2] = 255;
   pix._rgba[3] = 255;
@@ -154,8 +154,8 @@ int main(int argc, char **argv) {
     ESMFree(&epidemicESM);
     return 1;
   }
-  float fromPx[2];
-  float toPx[2];
+  VecFloat *fromPx = VecFloatCreate(2);
+  VecFloat *toPx = VecFloatCreate(2);
   pix._rgba[0] = pix._rgba[1] = 155;
   TGAPencilSetColor(pen, &pix);
   for (int iSample = 0; iSample < nbSampleEpidemic - 1; ++iSample) {
@@ -163,10 +163,10 @@ int main(int argc, char **argv) {
     esmEvt event = dataEpidemic[3 * iSample + 1];
     esmStat to = dataEpidemic[3 * iSample + 2];
     if (event > 1) {
-      fromPx[0] = (event - 1) * coeff[0];
-      fromPx[1] = from * coeff[1];
-      toPx[0] = event * coeff[0];
-      toPx[1] = to * coeff[1];
+      VecSet(fromPx, 0, (event - 1) * coeff[0]);
+      VecSet(fromPx, 1, from * coeff[1]);
+      VecSet(toPx, 0, event * coeff[0]);
+      VecSet(toPx, 1, to * coeff[1]);
       TGADrawLine(graph, fromPx, toPx, pen);
     }
   }
@@ -181,16 +181,16 @@ int main(int argc, char **argv) {
     } else {
       ESMStepByEvt(epidemicESM, iWeek);
       esmStat nextStat = ESMGetStat(epidemicESM);
-      fromPx[0] = (iWeek - 1) * coeff[0];
-      fromPx[1] = curStat * coeff[1];
-      toPx[0] = iWeek * coeff[0];
-      toPx[1] = nextStat * coeff[1];
+      VecSet(fromPx, 0, (iWeek - 1) * coeff[0]);
+      VecSet(fromPx, 1, curStat * coeff[1]);
+      VecSet(toPx, 0, iWeek * coeff[0]);
+      VecSet(toPx, 1, nextStat * coeff[1]);
       TGADrawLine(graph, fromPx, toPx, pen);
       printf("%d/%s, ", iWeek, strStatEpidemic[curStat]);
     }
   }
   printf("\n");
-  TGAGaussBlur(graph, 0.5, 2.0);
+  TGAFilterGaussBlur(graph, 0.5, 2.0);
   TGASave(graph, (char*)"./graph.tga");
   TGAFree(&graph);
   // Forecast probability from week 48, 3 weeks ahead
@@ -288,6 +288,9 @@ int main(int argc, char **argv) {
   // Free memory
   ESMFree(&epidemicESM);
   ESMFree(&clone);
+  VecFree(&dim);
+  VecFree(&fromPx);
+  VecFree(&toPx);
 
   return 0;
 }

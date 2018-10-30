@@ -4,7 +4,12 @@ OPTIONS=$(OPTIONS_RELEASE)
 INCPATH=/home/bayashi/Coding/Include
 LIBPATH=/home/bayashi/Coding/Include
 
-all : haircut disease epidemic cashier evtstatmac
+all : pbmake_wget haircut disease epidemic cashier evtstatmac
+	
+# Automatic installation of the repository PBMake in the parent folder
+pbmake_wget:
+	if [ ! -d ../PBMake ]; then wget https://github.com/BayashiPascal/PBMake/archive/master.zip; unzip master.zip; rm -f master.zip; sed -i 's@ROOT_DIR=.*@ROOT_DIR='"`pwd | awk -F/ 'NF{NF-=1};1' | sed --expression='s@ @/@g'`"'@' PBMake-master/Makefile.inc; mv PBMake-master ../PBMake; fi
+
 
 clean:
 	rm *.o haircut disease epidemic cashier evtstatmac
